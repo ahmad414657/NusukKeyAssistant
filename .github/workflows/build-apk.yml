@@ -10,45 +10,36 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v5
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
-      - name: Set up Android
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install SDK
+      - name: Install Android SDK
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Extract ZIP
+      - name: Extract Project ZIP
         run: |
-          mkdir -p source
-          ZIP_FILE=$(find . -maxdepth 1 -iname '*.zip' -print -quit)
-          if [ -z "$ZIP_FILE" ]; then
-            echo "Project ZIP not found"
-            exit 1
-          fi
-          unzip -q "$ZIP_FILE" -d source
+          mkdir project
+          unzip -q NusukKeyAssistant-Android-Project-MobileBuild.zip -d project
 
-      - name: Find Android Project
+      - name: Locate Gradle Project
         run: |
-          FILE=$(find source -name settings.gradle.kts -print -quit)
+          FILE=$(find project -name settings.gradle.kts | head -n 1)
           if [ -z "$FILE" ]; then
             echo "Gradle project not found"
-            find source -maxdepth 4 -type f
+            find project -maxdepth 5 -type f
             exit 1
           fi
           DIR=$(dirname "$FILE")
-          echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
+          echo "PROJECT_DIR=$DIR" >> "$GITHUB_ENV"
+          echo "Found project: $DIR"
 
       - name: Build APK
         run: gradle -p "$PROJECT_DIR" assembleDebug
