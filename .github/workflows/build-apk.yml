@@ -1,5 +1,4 @@
-
-name: Build Nusuk APK
+name: Build Android APK
 
 on:
   workflow_dispatch:
@@ -7,9 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -26,27 +24,15 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK packages
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Extract project ZIP
-        run: |
-          mkdir -p project
-          unzip -o NusukKeyAssistant-Android-Project-MobileBuild.zip -d project
-
-      - name: Find project directory
-        run: |
-          PROJECT_DIR=$(find project -name settings.gradle.kts -printf '%h\n' | head -n 1)
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-
-      - name: Build APK
-        run: gradle -p "$PROJECT_DIR" assembleDebug
+      - name: Build debug APK
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: NusukKeyAssistant-APK
-          path: project/**/build/outputs/apk/debug/*.apk
+          name: NusukKeyAssistant-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
