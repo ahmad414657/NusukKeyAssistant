@@ -46,7 +46,7 @@ class MainActivity : Activity() {
         codeInput = EditText(this).apply {
             hint = "ওয়েবসাইট থেকে পাওয়া Key এখানে পেস্ট করুন"
             textSize = 17f
-            singleLine (true)
+            setSingleLine (true)
         }
         layout.addView(codeInput, matchWrap())
 
